@@ -100,11 +100,17 @@ class EmployeeOrgApp implements IEmployeeOrgApp {
 
   move(employeeID: number, supervisorID: number): void {
     throw new Error("Method not implemented.");
+    // After move functionality, push the operation in undo i.e operation.undo.push('1634632993604 -> 1634633043118') 
   }
   undo(): void {
     throw new Error("Method not implemented.");
+    // After undo push the operation in redo
   }
   redo(): void {
+    // After redo push this operation in undo
     throw new Error("Method not implemented.");
   } 
 }
+
+// const obj = new EmployeeOrgApp(ceo);
+// obj.move(1634632993604, 1634633043118);
