@@ -95,11 +95,6 @@ class EmployeeOrgApp implements IEmployeeOrgApp {
   stack:any[] = [];
   pointer:number = -1;
 
-  operation: Operation = {
-    undo: [],
-    redo: []
-  }
-
   constructor(ceoObj: Employee) {
     this.ceo = ceoObj;
   }
@@ -160,9 +155,28 @@ class EmployeeOrgApp implements IEmployeeOrgApp {
   }
 
   undo(): void {
-    throw new Error("Method not implemented.");
-    // After undo push the operation in redo
+    if (this.pointer < 0) {
+      console.log('cannot undo, at oldest state');
+      return
+    }
+    const { empId, prevSupId, marked } = this.stack[this.pointer];
+    const prevSubordinates = marked;
+    const empDetails = this.getEmpDetails(empId);
+    this.stack[this.pointer] = {empId, supId: empDetails.parent.uniqueId};
+    this.pointer -= 1;
+  
+    let { empObj, supObj } = this.moveEmp(empId, prevSupId);
+    empObj = empObj.node;
+    supObj = supObj.node;
+    for (let index=0; index<supObj.subordinates.length; index++) {
+      const id = supObj.subordinates[index].uniqueId;
+      if (prevSubordinates.includes(id)) {
+        const subEmp = supObj.subordinates.splice(index, 1);
+        empObj.subordinates.push(subEmp);
+      }
+    }
   }
+
   redo(): void {
     // After redo push this operation in undo
     throw new Error("Method not implemented.");
