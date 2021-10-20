@@ -178,10 +178,36 @@ class EmployeeOrgApp implements IEmployeeOrgApp {
   }
 
   redo(): void {
-    // After redo push this operation in undo
-    throw new Error("Method not implemented.");
+    if (this.pointer >= this.stack.length) {
+      console.log('cannot redo, at most recent state');
+      return
+    }
+    this.pointer += 1;
+    const { empId, supId } = this.stack[this.pointer];
+    const { marked, empObj } = this.moveEmp(empId, supId);
+    this.stack[this.pointer] = {empId, prevSupId: empObj.parent.uniqueId , marked};
   } 
 }
 
+const map = {
+  mark: 1634632854560,
+  sarah: 1634632963747,
+  casandra: 1634632972400,
+  mary: 1634632983668,
+  bob: 1634632993604,
+  tina: 1634633002411,
+  will: 1634633010699,
+  tyler: 1634633019191,
+  harry: 1634633027743,
+  thomas: 1634633035601,
+  george: 1634633043118,
+  gary: 1634633052157,
+  bruce: 1634633061108,
+  georgina: 1634633456307,
+  sophie: 1634633457037,
+}
+
 const obj = new EmployeeOrgApp(ceo);
-obj.move(1634632993604, 1634633043118)
+obj.move(map.will, map.georgina)
+obj.undo()
+obj.redo()
