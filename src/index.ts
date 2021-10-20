@@ -68,6 +68,9 @@ const ceo: Employee = {
 
 interface IEmployeeOrgApp {
   ceo: Employee;
+
+  getEmpDetails(empId: number, tree?: Employee): any;
+
   /**
   * Moves the employee with employeeID (uniqueId) under a supervisor
   (another employee) that has supervisorID (uniqueId).
@@ -89,6 +92,34 @@ interface Operation {
 
 class EmployeeOrgApp implements IEmployeeOrgApp {
   ceo: Employee;
+
+  getEmpDetails(empId: number, tree:Employee=ceo): any {
+    let path = [tree.uniqueId];
+    let node: Employee = tree;
+  
+    if (tree.uniqueId === empId) {
+      return {present: 2, node, path}
+    } 
+    else if (node.subordinates.length > 0) {
+      for (let index=0; index<node.subordinates.length; index++) {
+        let subtree = node.subordinates[index];
+        let details = this.getEmpDetails(empId, subtree);
+  
+        if (details.present === 2) {
+          path.push(...details.path);
+          return {present: 1, node: details.node, path, parent: node}
+        } else if (details.present === 1){
+          path.push(...details.path);
+          return {present: 1, node: details.node, path, parent: details.parent }
+        }
+      }
+      return {present: 0};
+    } 
+    else {
+      return {present: 0};
+    }
+  }
+
   operation: Operation = {
     undo: [],
     redo: []
@@ -99,9 +130,19 @@ class EmployeeOrgApp implements IEmployeeOrgApp {
   }
 
   move(employeeID: number, supervisorID: number): void {
-    throw new Error("Method not implemented.");
-    // After move functionality, push the operation in undo i.e operation.undo.push('1634632993604 -> 1634633043118') 
+    let empObj = this.getEmpDetails(employeeID);
+    let supObj = this.getEmpDetails(supervisorID);
+
+    empObj.parent.subordinates.push(...empObj.node.subordinates);
+
+    const index = empObj.parent.subordinates.indexOf(empObj.node);
+    if (index > -1) {
+      empObj.parent.subordinates.splice(index, 1);
+    }
+    empObj.node.subordinates = [];
+    supObj.node.subordinates.push(empObj.node);
   }
+
   undo(): void {
     throw new Error("Method not implemented.");
     // After undo push the operation in redo
@@ -112,5 +153,5 @@ class EmployeeOrgApp implements IEmployeeOrgApp {
   } 
 }
 
-// const obj = new EmployeeOrgApp(ceo);
-// obj.move(1634632993604, 1634633043118);
+const obj = new EmployeeOrgApp(ceo);
+obj.move(1634632993604, 1634633043118)
